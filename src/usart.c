@@ -215,6 +215,26 @@ long read_hex()
     return value;
 }
 
+/* Blocks until the user enters a character */
+char read_char()
+{
+    char c;
+
+    /* Wait for the enter key to be pressed */
+    while((rx_counter == 0) || (rx_buffer[rx_counter - 1] != '\r'));
+    rx_buffer[rx_counter - 1] = '\0';
+
+    /* Return the first character entered, ignore the rest */
+    c = rx_buffer[0];
+
+    /* Disable the interrupt, reset the rx_counter */
+    CLEAR_BIT(USART3->CR1, USART_CR1_RXNEIE);
+    rx_counter = 0;
+    SET_BIT(USART3->CR1, USART_CR1_RXNEIE);
+
+    return c;
+}
+
 /**
  * @brief This function handles the USART3 IRQ Handler 
  */
@@ -224,10 +244,23 @@ void USART3_IRQHandler(void)
     {
         /* Read one byte from the receive data register */
         rx_buffer[rx_counter] = USART3->RDR & 0x1FF;
-        __io_putchar(rx_buffer[rx_counter++]); /* Echo back */
-        if(rx_buffer[rx_counter-1] == '\r')
+        if(rx_buffer[rx_counter] == '\r')
+        {
+            __io_putchar('\r');
             __io_putchar('\n');
+        }
+        // Backspace or delete character
+        else if((rx_buffer[rx_counter] == '\b' || rx_buffer[rx_counter] == 0x7f) && rx_counter > 0)
+        {
+            rx_counter -= 2;
+            write_string("\b\033[K"); // Clear the deleted character
+        }
+        else
+        {
+            __io_putchar(rx_buffer[rx_counter]);
+        }
 
+        rx_counter++;
         if(rx_counter == RX_BUFFER_SIZE)
         {
             /* Disable the UART 4 Receive interrupt */

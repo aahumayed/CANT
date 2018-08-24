@@ -13,13 +13,16 @@ char* Menu_Commands_Text[MENU_NUM_ITEMS] = {
     "Show ARBIDS",
     "Set buadrate",
     "Choose Attack",
+    "End Attack",
 };
 
 char* Attack_Commands_Text[ATTACK_NUM_ITEMS] = {
     "",
     "Bus Killer - constantly transmit arbid 0",
     "Data Replacer - replace the data sent with the configured arbid with the supplied data",
-    "Overload Inserter - Send specified number of overload frames after each message"
+    "Overload Inserter - Send specified number of overload frames after each message",
+    "Bus Short - Short CANH and CANL (aka \"Cyber-Paperclip Mode\")",
+    "NACK Attack - kill the ACK response"
 };
 
 static void handle_command();
@@ -83,12 +86,15 @@ static void handle_command()
         case MENU_CHOOSE_ATTACK:
             chooseAttack();
             break;
+        case MENU_STOP_ATTACK:
+            remove_attack();
+            break;
         default:
             write_string("No such command\r\n");
             break;
         
     }
-    write_string("CANT>");
+    write_string("\r\nCANT>");
 }
 
 /**
@@ -155,6 +161,14 @@ static void chooseAttack(void)
         case ATTACK_OVERLOAD_FRAMES:
             install_overload_frame();
             write_string("Installing the overload attack\r\n");
+            break;
+        case ATTACK_BUS_SHORT:
+            install_bus_short();
+            write_string("Installing the bus short attack\r\n");
+            break;
+        case ATTACK_NACK:
+            install_nack_attack();
+            write_string("Installing the NACK Attack\r\n");
             break;
         default:
             write_string("No such Attack\r\n");

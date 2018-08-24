@@ -1,0 +1,469 @@
+EESchema Schematic File Version 4
+LIBS:CANT-cache
+EELAYER 26 0
+EELAYER END
+$Descr USLetter 11000 8500
+encoding utf-8
+Sheet 1 1
+Title "CANT Shield"
+Date ""
+Rev ""
+Comp ""
+Comment1 ""
+Comment2 ""
+Comment3 ""
+Comment4 ""
+$EndDescr
+$Comp
+L CANT-rescue:Conn_02x10_Odd_Even CN7
+U 1 1 5A7C7299
+P 7000 2600
+F 0 "CN7" H 7050 3100 50  0000 C CNN
+F 1 "CN7" H 7050 2000 50  0000 C CNN
+F 2 "Pin_Headers:Pin_Header_Straight_2x10_Pitch2.54mm" H 7000 2600 50  0001 C CNN
+F 3 "" H 7000 2600 50  0001 C CNN
+	1    7000 2600
+	1    0    0    -1  
+$EndComp
+$Comp
+L CANT-rescue:Conn_02x08_Odd_Even-RESCUE-CANT CN8
+U 1 1 5A7C7372
+P 1550 2850
+F 0 "CN8" H 1600 3250 50  0000 C CNN
+F 1 "CN8" H 1600 2350 50  0000 C CNN
+F 2 "Pin_Headers:Pin_Header_Straight_2x08_Pitch2.54mm" H 1550 2850 50  0001 C CNN
+F 3 "" H 1550 2850 50  0001 C CNN
+	1    1550 2850
+	1    0    0    -1  
+$EndComp
+NoConn ~ 1350 2550
+$Comp
+L CANT-rescue:GND #PWR02
+U 1 1 5A7C812E
+P 3050 3150
+F 0 "#PWR02" H 3050 2900 50  0001 C CNN
+F 1 "GND" H 3050 3000 50  0000 C CNN
+F 2 "" H 3050 3150 50  0001 C CNN
+F 3 "" H 3050 3150 50  0001 C CNN
+	1    3050 3150
+	1    0    0    -1  
+$EndComp
+$Comp
+L CANT-rescue:Jumper JP1
+U 1 1 5A7C8403
+P 4450 2050
+F 0 "JP1" H 4450 2200 50  0000 C CNN
+F 1 "Jumper" H 4450 1970 50  0000 C CNN
+F 2 "Pin_Headers:Pin_Header_Straight_1x02_Pitch2.54mm" H 4450 2050 50  0001 C CNN
+F 3 "" H 4450 2050 50  0001 C CNN
+	1    4450 2050
+	1    0    0    -1  
+$EndComp
+$Comp
+L CANT-rescue:R R1
+U 1 1 5A7C872B
+P 4000 1950
+F 0 "R1" V 4080 1950 50  0000 C CNN
+F 1 "120" V 4000 1950 50  0000 C CNN
+F 2 "Resistors_SMD:R_0805_HandSoldering" V 3930 1950 50  0001 C CNN
+F 3 "" H 4000 1950 50  0001 C CNN
+	1    4000 1950
+	0    1    1    0   
+$EndComp
+$Comp
+L CANT-rescue:GND #PWR03
+U 1 1 5A7C925A
+P 2400 1800
+F 0 "#PWR03" H 2400 1550 50  0001 C CNN
+F 1 "GND" H 2400 1650 50  0000 C CNN
+F 2 "" H 2400 1800 50  0001 C CNN
+F 3 "" H 2400 1800 50  0001 C CNN
+	1    2400 1800
+	0    1    1    0   
+$EndComp
+$Comp
+L CANT-rescue:GND #PWR04
+U 1 1 5A7C927A
+P 2400 2050
+F 0 "#PWR04" H 2400 1800 50  0001 C CNN
+F 1 "GND" H 2400 1900 50  0000 C CNN
+F 2 "" H 2400 2050 50  0001 C CNN
+F 3 "" H 2400 2050 50  0001 C CNN
+	1    2400 2050
+	0    1    1    0   
+$EndComp
+$Comp
+L CANT-rescue:C_Small C2
+U 1 1 5A7C92BE
+P 2650 1800
+F 0 "C2" H 2660 1870 50  0000 L CNN
+F 1 "0.1uF" H 2400 1700 50  0000 L CNN
+F 2 "Capacitors_SMD:C_0805_HandSoldering" H 2650 1800 50  0001 C CNN
+F 3 "" H 2650 1800 50  0001 C CNN
+	1    2650 1800
+	0    1    1    0   
+$EndComp
+$Comp
+L CANT-rescue:C_Small C3
+U 1 1 5A7C9304
+P 2650 2050
+F 0 "C3" H 2660 2120 50  0000 L CNN
+F 1 "10 uF" H 2550 1950 50  0000 L CNN
+F 2 "Capacitors_SMD:C_0805_HandSoldering" H 2650 2050 50  0001 C CNN
+F 3 "" H 2650 2050 50  0001 C CNN
+	1    2650 2050
+	0    1    1    0   
+$EndComp
+$Comp
+L CANT-rescue:SP1002-02 D1
+U 1 1 5A7C9FF9
+P 6300 1550
+F 0 "D1" H 6300 1725 40  0000 C CNN
+F 1 "SP1002-02" H 6300 1375 40  0000 C CNN
+F 2 "TO_SOT_Packages_SMD:SOT-353_SC-70-5_Handsoldering" H 6350 1600 60  0001 C CNN
+F 3 "" H 6350 1600 60  0000 C CNN
+	1    6300 1550
+	0    1    1    0   
+$EndComp
+$Comp
+L CANT-rescue:GND #PWR05
+U 1 1 5A7CA378
+P 6300 2000
+F 0 "#PWR05" H 6300 1750 50  0001 C CNN
+F 1 "GND" H 6300 1850 50  0000 C CNN
+F 2 "" H 6300 2000 50  0001 C CNN
+F 3 "" H 6300 2000 50  0001 C CNN
+	1    6300 2000
+	1    0    0    -1  
+$EndComp
+$Comp
+L CANT-rescue:GND #PWR06
+U 1 1 5A7CA424
+P 5150 2000
+F 0 "#PWR06" H 5150 1750 50  0001 C CNN
+F 1 "GND" H 5150 1850 50  0000 C CNN
+F 2 "" H 5150 2000 50  0001 C CNN
+F 3 "" H 5150 2000 50  0001 C CNN
+	1    5150 2000
+	1    0    0    -1  
+$EndComp
+$Comp
+L CANT-rescue:C_Small C4
+U 1 1 5A7CA44A
+P 4950 1500
+F 0 "C4" H 4960 1570 50  0000 L CNN
+F 1 "100pF" H 4960 1420 50  0000 L CNN
+F 2 "Capacitors_SMD:C_0805_HandSoldering" H 4950 1500 50  0001 C CNN
+F 3 "" H 4950 1500 50  0001 C CNN
+	1    4950 1500
+	1    0    0    -1  
+$EndComp
+$Comp
+L CANT-rescue:C_Small C5
+U 1 1 5A7CA4B1
+P 5450 1500
+F 0 "C5" H 5460 1570 50  0000 L CNN
+F 1 "100pF" H 5460 1420 50  0000 L CNN
+F 2 "Capacitors_SMD:C_0805_HandSoldering" H 5450 1500 50  0001 C CNN
+F 3 "" H 5450 1500 50  0001 C CNN
+	1    5450 1500
+	1    0    0    -1  
+$EndComp
+NoConn ~ 1350 2650
+NoConn ~ 1350 2750
+NoConn ~ 1350 3250
+NoConn ~ 1850 3250
+NoConn ~ 1850 3150
+NoConn ~ 1850 3050
+NoConn ~ 1850 2950
+NoConn ~ 1850 2850
+NoConn ~ 1850 2750
+NoConn ~ 1850 2650
+NoConn ~ 1850 2550
+$Comp
+L CANT-rescue:VCC #PWR07
+U 1 1 5A7CA83A
+P 1050 2850
+F 0 "#PWR07" H 1050 2700 50  0001 C CNN
+F 1 "VCC" H 1050 3000 50  0000 C CNN
+F 2 "" H 1050 2850 50  0001 C CNN
+F 3 "" H 1050 2850 50  0001 C CNN
+	1    1050 2850
+	0    -1   -1   0   
+$EndComp
+$Comp
+L CANT-rescue:GND #PWR08
+U 1 1 5A7CA8E4
+P 1050 3100
+F 0 "#PWR08" H 1050 2850 50  0001 C CNN
+F 1 "GND" H 1050 2950 50  0000 C CNN
+F 2 "" H 1050 3100 50  0001 C CNN
+F 3 "" H 1050 3100 50  0001 C CNN
+	1    1050 3100
+	0    1    1    0   
+$EndComp
+NoConn ~ 6800 2200
+NoConn ~ 6800 2300
+NoConn ~ 6800 2600
+NoConn ~ 6800 2700
+NoConn ~ 6800 2800
+NoConn ~ 6800 2900
+NoConn ~ 6800 3000
+NoConn ~ 6800 3100
+NoConn ~ 7300 3100
+NoConn ~ 7300 3000
+NoConn ~ 7300 2900
+NoConn ~ 7300 2800
+NoConn ~ 7300 2700
+NoConn ~ 7300 2300
+NoConn ~ 7300 2200
+NoConn ~ 7300 2400
+$Comp
+L CANT-rescue:GND #PWR09
+U 1 1 5A7CB275
+P 7500 2500
+F 0 "#PWR09" H 7500 2250 50  0001 C CNN
+F 1 "GND" H 7500 2350 50  0000 C CNN
+F 2 "" H 7500 2500 50  0001 C CNN
+F 3 "" H 7500 2500 50  0001 C CNN
+	1    7500 2500
+	0    -1   -1   0   
+$EndComp
+Text GLabel 6300 2400 0    60   Input ~ 0
+CAN_TX
+Text GLabel 6300 2500 0    60   Input ~ 0
+CAN_RX
+Text GLabel 2400 2400 0    60   Input ~ 0
+CAN_TX
+Text GLabel 2400 2500 0    60   Input ~ 0
+CAN_RX
+Wire Wire Line
+	4150 2050 4150 1950
+Wire Wire Line
+	2750 2050 3000 2050
+Wire Wire Line
+	2550 2050 2400 2050
+Wire Wire Line
+	3800 1950 3850 1950
+Wire Wire Line
+	4750 1200 4750 2050
+Wire Wire Line
+	4750 1200 5450 1200
+Wire Wire Line
+	3800 1100 4950 1100
+Wire Wire Line
+	6250 2000 6300 2000
+Connection ~ 6300 2000
+Wire Wire Line
+	4950 1100 4950 1400
+Connection ~ 4950 1100
+Wire Wire Line
+	4950 1600 4950 2000
+Wire Wire Line
+	4950 2000 5150 2000
+Wire Wire Line
+	5450 1200 5450 1400
+Connection ~ 5450 1200
+Wire Wire Line
+	5450 2000 5450 1600
+Connection ~ 5150 2000
+Wire Wire Line
+	1050 2850 1350 2850
+Wire Wire Line
+	1050 3150 1100 3150
+Wire Wire Line
+	1050 3050 1050 3100
+Wire Wire Line
+	1350 3050 1050 3050
+Connection ~ 1050 3100
+Wire Wire Line
+	7300 2500 7500 2500
+Wire Wire Line
+	6300 2400 6800 2400
+Wire Wire Line
+	6800 2500 6300 2500
+Wire Wire Line
+	2400 2400 2550 2400
+$Comp
+L CANT-rescue:C_Small C1
+U 1 1 5A7CBB90
+P 2550 2900
+F 0 "C1" H 2560 2970 50  0000 L CNN
+F 1 "100pF" H 2560 2820 50  0000 L CNN
+F 2 "Capacitors_SMD:C_0805_HandSoldering" H 2550 2900 50  0001 C CNN
+F 3 "" H 2550 2900 50  0001 C CNN
+	1    2550 2900
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	2550 2400 2550 2800
+Wire Wire Line
+	2550 3000 2550 3100
+Wire Wire Line
+	2550 3100 2800 3100
+$Comp
+L CANT-rescue:PWR_FLAG #FLG010
+U 1 1 5A7CC97A
+P 1100 3150
+F 0 "#FLG010" H 1100 3225 50  0001 C CNN
+F 1 "PWR_FLAG" H 1100 3300 50  0000 C CNN
+F 2 "" H 1100 3150 50  0001 C CNN
+F 3 "" H 1100 3150 50  0001 C CNN
+	1    1100 3150
+	-1   0    0    1   
+$EndComp
+Connection ~ 1100 3150
+Wire Wire Line
+	6250 1375 6250 1100
+Connection ~ 6250 1100
+Wire Wire Line
+	6350 1375 6350 1200
+Connection ~ 6350 1200
+Wire Wire Line
+	6350 2000 6350 1725
+Wire Wire Line
+	6250 2000 6250 1725
+NoConn ~ 6300 1650
+$Comp
+L CANT-rescue:Screw_Terminal_01x02 J1
+U 1 1 5A7CFC49
+P 9225 1100
+F 0 "J1" H 9225 1200 50  0000 C CNN
+F 1 "Screw_Terminal_01x02" H 9225 900 50  0000 C CNN
+F 2 "Connectors_Terminal_Blocks:TerminalBlock_Pheonix_PT-3.5mm_2pol" H 9225 1100 50  0001 C CNN
+F 3 "" H 9225 1100 50  0001 C CNN
+	1    9225 1100
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	3000 2050 3000 1800
+Wire Wire Line
+	6300 2000 6350 2000
+Wire Wire Line
+	4950 1100 6250 1100
+Wire Wire Line
+	5450 1200 6350 1200
+Wire Wire Line
+	5150 2000 5450 2000
+Wire Wire Line
+	1050 3100 1050 3150
+Wire Wire Line
+	3050 3100 3050 3150
+Wire Wire Line
+	1100 3150 1350 3150
+Wire Wire Line
+	6250 1100 7900 1100
+Wire Wire Line
+	6350 1200 8400 1200
+$Comp
+L 74xgxx:74LVC1G66 U2
+U 1 1 5B4BCDF0
+P 8150 1650
+F 0 "U2" H 8150 1966 50  0000 C CNN
+F 1 "74LVC1G66" H 8150 1875 50  0000 C CNN
+F 2 "TO_SOT_Packages_SMD:SOT-353_SC-70-5_Handsoldering" H 8150 1650 50  0001 C CNN
+F 3 "http://www.ti.com/lit/sg/scyt129e/scyt129e.pdf" H 8150 1650 50  0001 C CNN
+	1    8150 1650
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	7900 1650 7900 1100
+Connection ~ 7900 1100
+Wire Wire Line
+	7900 1100 9025 1100
+Wire Wire Line
+	8400 1650 8400 1200
+Connection ~ 8400 1200
+Wire Wire Line
+	8400 1200 9025 1200
+Wire Wire Line
+	7900 1800 7900 2600
+Wire Wire Line
+	7900 2600 7300 2600
+$Comp
+L TJA1051:TJA1051T_3 U1
+U 1 1 5B4D3873
+P 3300 2600
+F 0 "U1" H 3300 3178 50  0000 C CNN
+F 1 "TJA1051T_3" H 3300 3087 50  0000 C CNN
+F 2 "Housings_SOIC:SOIC-8_3.9x4.9mm_Pitch1.27mm" H 3300 2100 50  0001 C CIN
+F 3 "" H 3300 2600 50  0001 C CNN
+	1    3300 2600
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	3800 1100 3800 1950
+Wire Wire Line
+	2800 2400 2550 2400
+Connection ~ 2550 2400
+Wire Wire Line
+	2400 2500 2800 2500
+Wire Wire Line
+	3800 2500 3800 1950
+Connection ~ 3800 1950
+Wire Wire Line
+	3800 2700 4750 2700
+Wire Wire Line
+	4750 2700 4750 2050
+Connection ~ 4750 2050
+Wire Wire Line
+	3300 3000 3300 3100
+Wire Wire Line
+	3300 3100 3050 3100
+Connection ~ 3050 3100
+Wire Wire Line
+	2800 2800 2800 3100
+Connection ~ 2800 3100
+Wire Wire Line
+	2800 3100 3050 3100
+Text GLabel 1050 2950 0    50   Input ~ 0
+5V
+Wire Wire Line
+	1350 2950 1050 2950
+Text GLabel 3000 1550 0    50   Input ~ 0
+5V
+Wire Wire Line
+	3000 1550 3000 1800
+Connection ~ 3000 1800
+Wire Wire Line
+	3000 2050 3000 2200
+Wire Wire Line
+	3000 2200 3300 2200
+Connection ~ 3000 2050
+$Comp
+L CANT-rescue:VCC #PWR01
+U 1 1 5B4EEA50
+P 2250 2700
+F 0 "#PWR01" H 2250 2550 50  0001 C CNN
+F 1 "VCC" V 2268 2827 50  0000 L CNN
+F 2 "" H 2250 2700 50  0001 C CNN
+F 3 "" H 2250 2700 50  0001 C CNN
+	1    2250 2700
+	0    -1   -1   0   
+$EndComp
+Wire Wire Line
+	2250 2700 2800 2700
+Wire Wire Line
+	2550 1800 2400 1800
+Wire Wire Line
+	2750 1800 3000 1800
+$Comp
+L CANT-rescue:C_Small C6
+U 1 1 5B4F4D4E
+P 2250 2900
+F 0 "C6" H 2260 2970 50  0000 L CNN
+F 1 "0.1uF" H 2000 2800 50  0000 L CNN
+F 2 "Capacitors_SMD:C_0805_HandSoldering" H 2250 2900 50  0001 C CNN
+F 3 "" H 2250 2900 50  0001 C CNN
+	1    2250 2900
+	-1   0    0    1   
+$EndComp
+Wire Wire Line
+	2250 2700 2250 2800
+Connection ~ 2250 2700
+Wire Wire Line
+	2250 3000 2250 3100
+Wire Wire Line
+	2250 3100 2550 3100
+Connection ~ 2550 3100
+$EndSCHEMATC

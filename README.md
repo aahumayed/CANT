@@ -1,20 +1,20 @@
 The CANT project is designed to allow people to screw around with CAN easily at layers 1/2.
 All of the stuff that is normally handled by a CAN controller that is baked into sillicon is up for grabs.
 
-CANT is designed to run on an ST Micro [Nucleo-H743ZI](http://www.st.com/en/evaluation-tools/nucleo-h743zi.html) 
+CANT is designed to run on an ST Micro [Nucleo-H743ZI](http://www.st.com/en/evaluation-tools/nucleo-h743zi.html)
 development board. This board was chosen due to its speed (400MHz) and essentially infinite ram and flash.
 
 ## Getting started with the Nucleo-STM32H7 development board
 
-The Nucleo-H743ZI board has an STLink V2.1 debugger built in, available via the Micro-USB port on the 
-opposite side of the board from the RJ-45 jack. This port provides the serial port for communication, 
-as well as the debugging interface. The serial port has a baud rate of 115200 kbps, 8N1. 
+The Nucleo-H743ZI board has an STLink V2.1 debugger built in, available via the Micro-USB port on the
+opposite side of the board from the RJ-45 jack. This port provides the serial port for communication,
+as well as the debugging interface. The serial port has a baud rate of 115200 kbps, 8N1.
 
-For CAN communication, PB12 is CAN RX and PB13 is CAN TX. Conveniently the CAN2 peripheral can also be 
-multiplexed to these pins, so switching from normal CAN operation to CANT operation would be 
-possible without rewiring. This is currently not implemented. I'm using the 
-[TI SN65HVD232](http://www.ti.com/product/sn65hvd232?qgpn=sn65hvd232) 3.3V CAN transceiver, 
-but any 3.3V CAN Transceiver should work. Some transceivers may require some additional 
+For CAN communication, PB12 is CAN RX and PB13 is CAN TX. Conveniently the CAN2 peripheral can also be
+multiplexed to these pins, so switching from normal CAN operation to CANT operation would be
+possible without rewiring. This is currently not implemented. I'm using the
+[TI SN65HVD232](http://www.ti.com/product/sn65hvd232?qgpn=sn65hvd232) 3.3V CAN transceiver,
+but any 3.3V CAN Transceiver should work. Some transceivers may require some additional
 programming or wiring, so check that if you go with something else.
 
 If you are using the CANT shield, pin PA5 is used to toggle the analog switch that shorts CANH and CANL
@@ -40,7 +40,7 @@ convenience:
 | PB4 | 19  | 20  | PF12|
 
 ### Flashing pre-built CANT
-The Nucleo-H743ZI dev board will present itself as a USB mass storage device. Dragging and dropping the CANT.elf file 
+The Nucleo-H743ZI dev board will present itself as a USB mass storage device. Dragging and dropping the CANT.elf file
 located in the `firmware/` folder to the dev board should properly flash the code to the dev board.
 
 Alternatively, you will need openocd installed to flash the prebuilt CANT. At the time of this writing the latest version
@@ -50,6 +50,10 @@ Presumably support will be added in the next release of openocd. In order to fla
 ```
 make flash_prebuilt
 ```
+## More details on PATH
+- Make sure that openocd scripts/flash_prebuilt.py is invoking is not older than version 0.10.0. You can download it from https://gnu-mcu-eclipse.github.io/openocd/install/
+- arm-none-eabi will need directories related to openocd. Make sure they are in the same directory where your Makefile is. There directories are: board, interface, and target. If you clone CANT from this repo, then you do not need to worry about this step.
+
 
 ### LEDs
 The green LED (LED1) flashes at a rate of 1hz. The blue LED (LED2) changes state for every 128 CAN frames
@@ -78,4 +82,3 @@ Version 0.1 of the shield was designed with a TI SN65HVD232DRG4 CAN transceiver,
 | CN7 | 20 pin 2.54mm pitch pin terminal | https://www.arrow.com/en/products/54102-t08-00/amphenol-fci | It's not clear, but these are sold singly. Buy 19 and they will come in a strip that you can use for CN7, CN8 and JP1 |
 | CN8 | 16 pin 2.54mm pitch pin terminal |  |  |
 | JP1 | 2 pin 2.54mm jumper header for 120Ohm resistor |  | Don't forget a jumper https://www.arrow.com/en/products/aksctgblack/assmann-wsw-components-inc |
-

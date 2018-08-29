@@ -46,7 +46,6 @@ $(ODIR)/$(PERIPH_ODIR)/%.o: $(SRCS)/$(PERIPH_ODIR)/src/%.c
 
 CANT: $(OBJS)
 	$(LD) $(OBJS) $(LDFLAGS) $(CFLAGS) -o $(ODIR)/CANT.elf
-	cp $(ODIR)/CANT.elf firmware/CANT.elf
 
 .PHONY: clean
 

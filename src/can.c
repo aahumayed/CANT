@@ -851,11 +851,11 @@ void install_nack_attack()
     nack_attack = 1;
 }
 
-void install_continuous_dominant_state()
+void install_blind_continuous_dominant_state()
 {
   GPIOB->ODR &= ~GPIO_PIN_13;
 }
-void uninstall_continuous_dominant_state()
+void uninstall_blind_continuous_dominant_state()
 {
   GPIOB->ODR |= GPIO_PIN_13;
 }
@@ -867,5 +867,5 @@ void remove_attack()
     uninstall_overload_frame();
     SHORT_OFF;
     nack_attack = 0;
-    uninstall_continuous_dominant_state();
+    uninstall_blind_continuous_dominant_state();
 }

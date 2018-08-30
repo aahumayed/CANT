@@ -9,7 +9,7 @@
 #include <stdbool.h>
 #include "usart.h"
 
-#define SHORT_ON GPIOA->ODR |= GPIO_PIN_5
+#define SHORT_ON GPIOA->ODR |= GPIO_PIN_5 // pin PA5 is connected to the switch on CANT_SHIELD
 #define SHORT_OFF GPIOA->ODR &= ~GPIO_PIN_5
 
 void (*timer4_callback_handler)(void) = NULL;
@@ -23,7 +23,7 @@ static uint32_t can_ticks_per_cycle;
 static uint32_t can_initial_delay;
 static uint32_t can_edge_interrupt_delay;
 
-static TIM_Base_InitTypeDef TIM_InitStructure; 
+static TIM_Base_InitTypeDef TIM_InitStructure;
 static volatile uint16_t bits_read = 0;
 static volatile uint8_t last_bit = 0;
 static volatile uint8_t same_bits_count = 0;
@@ -60,7 +60,7 @@ const uint32_t TIMER_PERIOD_NS = 50;
 
 /**************************************
  * CAN bitstream creation functions
- **************************************/ 
+ **************************************/
 
 /* Calculates the CRC based on the next bit in the message */
 uint16_t crc_next_bit(uint16_t crc_rg, uint8_t bit)
@@ -73,7 +73,7 @@ uint16_t crc_next_bit(uint16_t crc_rg, uint8_t bit)
     return crc_rg;
 }
 
-/* Calculate the CRC of a CAN message 
+/* Calculate the CRC of a CAN message
  * arbid is the 11 or 29 bit arbitration id
  * extended_arbid is 0 for an 11 bit id, non-zero for a 29-bit id
  * cntrl is the 3 control bits, RTR, IDE and r0
@@ -165,7 +165,7 @@ uint32_t stuff_data(uint8_t * in, uint8_t *out, uint8_t num_bits)
     uint8_t extra_bits = num_bits - (num_bytes * 8);
     uint8_t out_byte = 0;
     uint8_t out_bit = 7;
-    
+
     uint8_t last_bit = 2; // Ensure that the first bit does not match the last_bit, regardless if it's a 0 or 1
     uint8_t consecutive_bit_count = 0;
     out[0] = 0; // Zero the first output byte
@@ -218,8 +218,8 @@ uint32_t stuff_data(uint8_t * in, uint8_t *out, uint8_t num_bits)
     return (out_byte * 8) + (7 - out_bit);
 }
 
-/* Start initializing the CAN peripheral 
- * 
+/* Start initializing the CAN peripheral
+ *
  * The CAN bus is sampled using the timer 4 interrupt, which fires in the middle of the bit
  *
  * The timer 3 interrupt fires at the start of each CAN bit, and is used for the attacks
@@ -324,15 +324,15 @@ static void sync_callback(void)
     }
 }
 
-/* Interrupt callback for sampling a CAN message. Uses the 
+/* Interrupt callback for sampling a CAN message. Uses the
  * following global variables
  *
- * uint16_t bits_read = 0; 
- * uint8_t  last_bit = 0; 
- * uint8_t  same_bits_count = 0; 
- * uint32_t arbid; 
- * uint16_t msg_byte = 0; 
- * uint8_t  message[8]; 
+ * uint16_t bits_read = 0;
+ * uint8_t  last_bit = 0;
+ * uint8_t  same_bits_count = 0;
+ * uint32_t arbid;
+ * uint16_t msg_byte = 0;
+ * uint8_t  message[8];
  * uint8_t  extended_arbid = 0;
  * uint8_t  msg_len = 0;
  */
@@ -356,7 +356,7 @@ static void sample_callback(void)
             last_bit = bit_read;
         }
     }
-        
+
     else /* Not a stuff bit */
     {
         bits_read++;
@@ -480,7 +480,7 @@ static void sample_callback(void)
         same_bits_count = 1;
         bits_read = 1;
         last_bit = 0;
- 
+
         // Enable the external interrupt on the RX pin
         while(__HAL_GPIO_EXTI_GET_IT(GPIO_PIN_12) > 0)
             __HAL_GPIO_EXTI_CLEAR_IT(GPIO_PIN_12); // Clear any pending interrupt
@@ -607,19 +607,19 @@ static void arbid_killer()
         GPIOB->ODR &= ~GPIO_PIN_13;
     else if(tx_bit_count <= 33)
         GPIOB->ODR |= GPIO_PIN_13;
-    else if(tx_bit_count <= 35) 
+    else if(tx_bit_count <= 35)
         GPIOB->ODR &= ~GPIO_PIN_13;
     else if(tx_bit_count <= 37)
         GPIOB->ODR |= GPIO_PIN_13;
-    else if(tx_bit_count == 38) 
+    else if(tx_bit_count == 38)
         GPIOB->ODR &= ~GPIO_PIN_13;
     else if(tx_bit_count == 39)
         GPIOB->ODR |= GPIO_PIN_13;
-    else if(tx_bit_count <= 42) 
+    else if(tx_bit_count <= 42)
         GPIOB->ODR &= ~GPIO_PIN_13;
     else if(tx_bit_count <= 44)
         GPIOB->ODR |= GPIO_PIN_13;
-    else if(tx_bit_count == 45) 
+    else if(tx_bit_count == 45)
         GPIOB->ODR &= ~GPIO_PIN_13;
     else if(tx_bit_count == 46)
         GPIOB->ODR |= GPIO_PIN_13;
@@ -640,7 +640,7 @@ void uninstall_arbid_killer()
 static void data_replacer()
 {
     uint8_t bit = 1;
-    /* We're going to key off the bit-keeping that we're doing in the 
+    /* We're going to key off the bit-keeping that we're doing in the
      * sample_callback function in order to see where we are in the message and
      * to track any necessary bit stuffing. These variables are:
      *
@@ -745,7 +745,7 @@ void install_data_replacer()
 
     if(data_replacer_force_recessive > 0)
         write_string("Recessive Bits will be forced through bus shorting\r\n");
- 
+
     timer3_callback_handler = data_replacer;
 }
 
@@ -782,14 +782,14 @@ void overload_frame()
             overload_frame_first_recessive_bit = overload_frame_bit_counter;
     }
     /* Wait for 8 recessive bits to be transmitted */
-    else if ((overload_frame_first_recessive_bit > 0) && 
+    else if ((overload_frame_first_recessive_bit > 0) &&
              (overload_frame_bit_counter >= overload_frame_first_recessive_bit + 6))
     {
         /* Reset if we are sending more frames */
         overload_frames_sent++;
         if(overload_frames_sent < overload_frame_count)
         {
-            overload_frame_bit_counter = 7; // We won't see the 7 EOF bits again 
+            overload_frame_bit_counter = 7; // We won't see the 7 EOF bits again
             overload_frame_first_recessive_bit = 0;
         }
         /* Uninstall ourselves if we are done */
@@ -851,6 +851,14 @@ void install_nack_attack()
     nack_attack = 1;
 }
 
+void install_continuous_dominant_state()
+{
+  GPIOB->ODR &= ~GPIO_PIN_13;
+}
+void uninstall_continuous_dominant_state()
+{
+  GPIOB->ODR |= GPIO_PIN_13;
+}
 /* Calls all of the attack removal functions */
 void remove_attack()
 {
@@ -859,6 +867,5 @@ void remove_attack()
     uninstall_overload_frame();
     SHORT_OFF;
     nack_attack = 0;
+    uninstall_continuous_dominant_state();
 }
-
-

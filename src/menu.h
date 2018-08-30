@@ -26,11 +26,10 @@ typedef enum
     ATTACK_OVERLOAD_FRAMES,
     ATTACK_BUS_SHORT,
     ATTACK_NACK,
+    ATTACK_CONTINUOUS_DOMINANT_STATE,
     ATTACK_NUM_ITEMS,
 } Attack_Commands_T;
 
 
- 
+
 #endif /* MENU_H */
-
-

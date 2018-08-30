@@ -22,7 +22,8 @@ char* Attack_Commands_Text[ATTACK_NUM_ITEMS] = {
     "Data Replacer - replace the data sent with the configured arbid with the supplied data",
     "Overload Inserter - Send specified number of overload frames after each message",
     "Bus Short - Short CANH and CANL (aka \"Cyber-Paperclip Mode\")",
-    "NACK Attack - kill the ACK response"
+    "NACK Attack - kill the ACK response",
+    "Dominant State - constantly makes the bus on dominant state"
 };
 
 static void handle_command();
@@ -92,7 +93,7 @@ static void handle_command()
         default:
             write_string("No such command\r\n");
             break;
-        
+
     }
     write_string("\r\nCANT>");
 }
@@ -163,17 +164,21 @@ static void chooseAttack(void)
             write_string("Installing the overload attack\r\n");
             break;
         case ATTACK_BUS_SHORT:
-            install_bus_short();
-            write_string("Installing the bus short attack\r\n");
+            //install_bus_short();
+            //write_string("Installing the bus short attack\r\n");
+            write_string("Attack cannot work without CANT Shield\r\n");
             break;
         case ATTACK_NACK:
-            install_nack_attack();
-            write_string("Installing the NACK Attack\r\n");
+            //install_nack_attack();
+            //write_string("Installing the NACK Attack\r\n");
+            write_string("Attack cannot work without CANT Shield\r\n");
+            break;
+        case ATTACK_CONTINUOUS_DOMINANT_STATE:
+            install_continuous_dominant_state();
+            write_string("Installing the Dominant State Attack\r\n");
             break;
         default:
             write_string("No such Attack\r\n");
             break;
     }
 }
-
-

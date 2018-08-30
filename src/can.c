@@ -859,6 +859,22 @@ void uninstall_blind_continuous_dominant_state()
 {
   GPIOB->ODR |= GPIO_PIN_13;
 }
+void selective_continuous_dominant_state()
+{
+  if((bits_read >= 15) && (arbid == attack_arbid))
+  {
+    GPIOB->ODR &= ~GPIO_PIN_13;
+  }
+}
+void install_selective_continuous_dominant_state()
+{
+  timer3_callback_handler = selective_continuous_dominant_state;
+}
+void uninstall_selective_continuous_dominant_state()
+{
+  GPIOB->ODR |= GPIO_PIN_13;
+  timer3_callback_handler = NULL;
+}
 /* Calls all of the attack removal functions */
 void remove_attack()
 {
@@ -868,4 +884,5 @@ void remove_attack()
     SHORT_OFF;
     nack_attack = 0;
     uninstall_blind_continuous_dominant_state();
+    uninstall_selective_continuous_dominant_state();
 }

@@ -20,5 +20,6 @@ void install_overload_frame();
 void install_bus_short();
 void install_nack_attack();
 void install_blind_continuous_dominant_state();
+void install_selective_continuous_dominant_state();
 
 #endif /* TIMER_H */

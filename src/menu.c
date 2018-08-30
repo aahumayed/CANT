@@ -23,7 +23,8 @@ char* Attack_Commands_Text[ATTACK_NUM_ITEMS] = {
     "Overload Inserter - Send specified number of overload frames after each message",
     "Bus Short - Short CANH and CANL (aka \"Cyber-Paperclip Mode\")",
     "NACK Attack - kill the ACK response",
-    "Blind Dominant State - constantly makes the bus on dominant state"
+    "Blind Dominant State - constantly makes the bus on dominant state",
+    "Selective Dominant State - constantly makes the bus on dominant state WHEN an ID is detected"
 };
 
 static void handle_command();
@@ -175,7 +176,11 @@ static void chooseAttack(void)
             break;
         case ATTACK_BLIND_CONTINUOUS_DOMINANT_STATE:
             install_blind_continuous_dominant_state();
-            write_string("Installing the Dominant State Attack\r\n");
+            write_string("Installing the Blind Dominant State Attack\r\n");
+            break;
+        case ATTACK_SELECTIVE_CONTINUOUS_DOMINANT_STATE:
+            install_selective_continuous_dominant_state();
+            write_string("Installing the Selective Dominant State Attack\r\n");
             break;
         default:
             write_string("No such Attack\r\n");

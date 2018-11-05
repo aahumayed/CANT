@@ -308,7 +308,7 @@ void can_init()
 
 /* Checks to see if we've received a message and prints it out */
 void can_poll()
-{
+{ 
   if(frame_done)
     {
       frame_done = 0;

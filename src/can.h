@@ -9,16 +9,26 @@ extern volatile uint32_t attack_arbid;
 void can_init(void);
 void can_poll(void);
 void can_sync(void);
+void can1_sync();
 void can_timer_stop();
+void can1_timer_stop();
 void setCanBaudrate(long int baud);
 
 /* Attacks */
 void remove_attack();
-void install_arbid_killer();
-void install_data_replacer();
-void install_overload_frame();
-void install_bus_short();
-void install_nack_attack();
+//void install_arbid_killer();
+void install_attack_all();
+//void install_data_replacer();
+void install_bus_denial();
+//void install_overload_frame();
+void install_ecu_and_arbitration_denial();
+//void install_bus_short();
+void install_frame_denial();
+void install_firewall();
+void uninstall_firewall();
+//void install_nack_attack();
+//void install_blind_continuous_dominant_state();
+//void install_selective_continuous_dominant_state();
+//void install_selective_arbitration_dos();
 
 #endif /* TIMER_H */
-

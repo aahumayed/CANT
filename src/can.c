@@ -306,33 +306,14 @@ void can_init()
 
 
     /* Set up the EXTI interrupt */
-    HAL_NVIC_SetPriority(EXTI0_IRQn, 0, 0);//This is used for forwarding from main to attacker's bus
-    HAL_NVIC_SetPriority(EXTI15_10_IRQn, 0, 0);
+    HAL_NVIC_SetPriority(EXTI0_IRQn, 0, 0);//This is used for forwarding from main to attacker's bus CAN1->CAN2
+    HAL_NVIC_SetPriority(EXTI15_10_IRQn, 0, 0);// CAN2-CAN1
 }
 
 /* Checks to see if we've received a message and prints it out */
 void can_poll()
 {
 
-  // if(allow_traffic)
-  // {
-  //   /*
-  //   The following fixes errors when Tx2(PB13) is sending CAN1->CAN2
-  //   When commented out, CAN2->CAN1 works BUT CAN1->CAN2 does NOT because the interrupt is enabled
-  //   and treats the traffic as CAN2's
-  //   */
-  //   //HAL_NVIC_DisableIRQ(EXTI15_10_IRQn);
-  //   if (GPIOD->IDR & GPIO_PIN_0)
-  //   {
-  //     GPIOB->ODR |= GPIO_PIN_13;//forward recessive bit to the main bus
-  //   }
-  //   else
-  //   {
-  //     GPIOA->ODR ^= GPIO_PIN_7;
-  //     GPIOB->ODR &= ~GPIO_PIN_13;//forward dominant bit to the main bus
-  //   }
-  //
-  // }
   if(frame_done)
     {
       frame_done = 0;
@@ -422,19 +403,7 @@ void can1_sync()
     while(!synchronized);
     write_string("Done\r\n");//Once it is syncronised, traffic gets forwarded to bus2
 
-    /* Restarts the timer that fires on each CAN edge */
-  /*  TIM5->CR1 &= ~TIM_CR1_CEN;
-    TIM5->SR = ~TIM_IT_UPDATE;
-    TIM5->DIER &= ~TIM_IT_UPDATE;
-    NVIC_ClearPendingIRQ(TIM5_IRQn);
-    //TIM5->ARR = (can_ticks_per_cycle >> 1) - can_initial_delay- can_initial_delay;//delay: 170 ns -1.36 us
-    TIM5->ARR = can_ticks_per_cycle - can_edge_interrupt_delay;
-    TIM5->CNT = 0;
-
-    timer5_callback_handler = sample_callback5;
-
-    TIM5->DIER |= TIM_IT_UPDATE;
-    TIM5->CR1 |= TIM_CR1_CEN;*/
+   
     // Enable the external interrupt on the RX pin
     while(__HAL_GPIO_EXTI_GET_IT(GPIO_PIN_0) > 0)
        __HAL_GPIO_EXTI_CLEAR_IT(GPIO_PIN_0); // Clear any pending interrupt
@@ -626,8 +595,8 @@ static void sample_callback(void)
             else if((bits_read >= (65 + (8 * msg_len))) && (bits_read < (68 + (8 * msg_len)))){}// Inter Frame Segment TODO: Not presently accounting for overload frames
         }
     }
-    /* Currently skipping the EOF Header */
-    if((extended_arbid == 0 && bits_read >= (27 + 18 + (8 * msg_len))) ||
+    /* Currently NOT skipping the EOF Header */
+    if((extended_arbid == 0 && bits_read >= (30 + 18 + (8 * msg_len))) ||
        (extended_arbid == 1 && bits_read >= (40 + 18 + (8 * msg_len))))
     {
         can_timer_stop();
@@ -644,9 +613,9 @@ static void sample_callback(void)
          while(__HAL_GPIO_EXTI_GET_IT(GPIO_PIN_12) > 0)
              __HAL_GPIO_EXTI_CLEAR_IT(GPIO_PIN_12); // Clear any pending interrupt
 
-        /*while((NVIC->ISPR[EXTI15_10_IRQn >> 5u] & (1UL << (EXTI15_10_IRQn & 0x1FUL))) != 0UL)
+        while((NVIC->ISPR[EXTI15_10_IRQn >> 5u] & (1UL << (EXTI15_10_IRQn & 0x1FUL))) != 0UL)
             NVIC->ICPR[EXTI15_10_IRQn >> 5u] = (1UL << (EXTI15_10_IRQn & 0x1FUL));
-*/
+
         HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
 
 
@@ -819,8 +788,8 @@ static void sample_callback2(void)
          while(__HAL_GPIO_EXTI_GET_IT(GPIO_PIN_0) > 0)
              __HAL_GPIO_EXTI_CLEAR_IT(GPIO_PIN_0); // Clear any pending interrupt
 
-        // while((NVIC->ISPR[EXTI0_IRQn >> 5u] & (1UL << (EXTI0_IRQn & 0x1FUL))) != 0UL)
-        //     NVIC->ICPR[EXTI0_IRQn >> 5u] = (1UL << (EXTI0_IRQn & 0x1FUL));
+         while((NVIC->ISPR[EXTI0_IRQn >> 5u] & (1UL << (EXTI0_IRQn & 0x1FUL))) != 0UL)
+             NVIC->ICPR[EXTI0_IRQn >> 5u] = (1UL << (EXTI0_IRQn & 0x1FUL));
 
         HAL_NVIC_EnableIRQ(EXTI0_IRQn);
 
@@ -832,14 +801,6 @@ static void sample_callback2(void)
 //Timer3 that forwards from attacker's to the bus
 static void sample_callback3(void)
 {
-/*  if(NVIC_GetPendingIRQ(EXTI15_10_IRQn) == 1)
-    GPIOA->ODR ^= GPIO_PIN_;
-  else
-    GPIOA->ODR ^= GPIO_PIN_;
-*/
-//  if(bits_read==1)
-  //  allow_traffic=0;//do not forward traffic bus1->bus2 because it is the same!
-
     uint16_t bit_read = 0;
 
   if(!allow_traffic)//when bus1 is NOT being forwarded
@@ -855,27 +816,16 @@ static void sample_callback3(void)
       GPIOA->ODR &= ~GPIO_PIN_15;//forward dominant bit to the main bus
     }
   }
-  //else
-  //  GPIOA->ODR ^= GPIO_PIN_;
-
+  
 }
 
-//This function forward traffic from the main bus to the attacker's
-//Traffic is assumed to be non-malicious, so we forward without checking
 static void forwardMainToAttacker()
 {
-  timer5_callback_handler = sample_callback5;
 }
 
 static void firewall()
 {
-  // while(bits_read>0)//a frame is being sampled
-  // {
-  //if(sofDetected)
-  //{
-    //allow_traffic =1;
-  //}
-  // }
+  
 }
 
 /* Stops the timer4 timer */
@@ -938,10 +888,6 @@ void EXTI15_10_IRQHandler(void)
 
     /* Start the timer to start sampling the incoming CAN message */
     TIM4->ARR = can_ticks_per_cycle + can_initial_delay;//Original
-    //TIM4->ARR = can_ticks_per_cycle>>1 - can_initial_delay;//unstable
-    //TIM4->ARR = can_ticks_per_cycle - can_edge_interrupt_delay;//1.19 us
-    //TIM4->ARR = can_ticks_per_cycle>>1;//1.19 us
-
     TIM4->CNT = 0;
 
     timer4_callback_handler = sample_callback; //this doesn't forward traffic correctly. TIM3 does!
@@ -961,21 +907,7 @@ void EXTI15_10_IRQHandler(void)
     TIM3->SR = ~TIM_IT_UPDATE;
     TIM3->DIER &= ~TIM_IT_UPDATE;
     NVIC_ClearPendingIRQ(TIM3_IRQn);
-    //TIM3->ARR = can_ticks_per_cycle;//2.89 us
-    //TIM3->ARR = can_ticks_per_cycle/3;//1.53-1.7 us
-    //TIM3->ARR = (can_ticks_per_cycle>>1) - can_initial_delay-can_edge_interrupt_delay;//170 ns - 1.36 us
-    //TIM3->ARR = can_ticks_per_cycle - can_initial_delay-can_edge_interrupt_delay;//1.87-2.04 us
-    //TIM3->ARR = can_ticks_per_cycle - can_edge_interrupt_delay;//delay: 2.38-2.55
-    //TIM3->ARR = can_ticks_per_cycle/2 -can_initial_delay- can_initial_delay-can_initial_delay;//doesn't work
-    //TIM3->ARR = can_ticks_per_cycle - can_initial_delay;//delay: unstable 2.38-2.55 us
-    //TIM3->ARR = can_ticks_per_cycle >> 1;//delay: 1.87 us
-    //TIM3->ARR = (can_ticks_per_cycle >> 1) - can_initial_delay;//delay: 1.36-1.53 us
     TIM3->ARR = (can_ticks_per_cycle >> 1) - can_initial_delay- can_initial_delay;//delay: 170 ns -1.36 us
-    //TIM3->ARR = (can_ticks_per_cycle >> 1) - can_initial_delay- can_initial_delay- can_initial_delay;//doesn't work
-    //TIM3->ARR = (can_ticks_per_cycle >> 1) -can_edge_interrupt_delay;//1.36-1.53 us
-    //TIM3->ARR = (can_ticks_per_cycle >> 1) -can_edge_interrupt_delay - can_edge_interrupt_delay;//delay: 170 ns -1.36 us
-    //TIM3->ARR = (can_ticks_per_cycle >> 1) - can_initial_delay- can_initial_delay-can_edge_interrupt_delay;//doesn't work
-    //TIM3->ARR = can_ticks_per_cycle + can_initial_delay;//matches TIM4
     TIM3->CNT = 0;
     timer3_callback_handler = sample_callback3;//Forwards ECU's transmission to main bus
     TIM3->DIER |= TIM_IT_UPDATE;

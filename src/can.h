@@ -21,5 +21,7 @@ void install_bus_short();
 void install_nack_attack();
 void install_blind_continuous_dominant_state();
 void install_selective_continuous_dominant_state();
+void install_arbitration_dos();
+void install_selective_arbitration_dos();
 
 #endif /* TIMER_H */

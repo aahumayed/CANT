@@ -6,7 +6,7 @@ import signal
 import time
 
 ###############################################################
-# This script will automatically start a GDB debug 
+# This script will automatically start a GDB debug
 # session to the STM32 discovery board using OpenOCD. The working
 # directory is assumed to be the project root
 ###############################################################
@@ -24,12 +24,12 @@ def signal_handler(signal, frame):
 ###############################################################
 
 # We need gdb to respond to a SIGINT (ctrl-c), but by default,
-# that will cause every other child process to die, including 
-# openocd. Disable sigint, then re-enable it after the child 
-# spawns. The child inherits the current state of signal 
+# that will cause every other child process to die, including
+# openocd. Disable sigint, then re-enable it after the child
+# spawns. The child inherits the current state of signal
 # handlers.
 signal.signal(signal.SIGINT, signal.SIG_IGN)
-openocd = subprocess.Popen(["openocd", "-f", "board/st_nucleo_h743zi.cfg"])
+openocd = subprocess.Popen(["/home/abdulmalik/opt/gnu-mcu-eclipse/openocd/0.10.0-8-20180512-1921/bin/openocd", "-f", "board/st_nucleo_h743zi.cfg"])
 time.sleep(2) # Wait for this to start up
 
 # Set up a custom signal handler so that SIGINT doesn't kill
@@ -63,4 +63,3 @@ while gdb_proc.poll() == None:
 
 # Gracefully exit openocd
 openocd.terminate()
-

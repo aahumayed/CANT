@@ -22,6 +22,8 @@ char* Attack_Commands_Text[ATTACK_NUM_ITEMS] = {
     "Data Replacer - replace the data sent with the configured arbid with the supplied data",
     "Blind Dominant State - constantly makes the bus on dominant state",
     "Selective Dominant State - constantly makes the bus on dominant state WHEN an ID is detected",
+    "Arbitration DoS - prevents a target ID from successful transmission but results in errors",
+    "Selective Arbitration DoS - prevents a target ID from successful transmission without causing errors",
     "Overload Inserter - Send specified number of overload frames after each message",
     "Bus Short - Short CANH and CANL (aka \"Cyber-Paperclip Mode\")",
     "NACK Attack - kill the ACK response"
@@ -168,20 +170,28 @@ static void chooseAttack(void)
             install_selective_continuous_dominant_state();
             write_string("Installing the Selective Dominant State Attack\r\n");
             break;
-            case ATTACK_OVERLOAD_FRAMES:
-                install_overload_frame();
-                write_string("Installing the overload attack\r\n");
-                break;
-            case ATTACK_BUS_SHORT:
-                //install_bus_short();
-                //write_string("Installing the bus short attack\r\n");
-                write_string("Attack cannot work without CANT Shield\r\n");
-                break;
-            case ATTACK_NACK:
-                //install_nack_attack();
-                //write_string("Installing the NACK Attack\r\n");
-                write_string("Attack cannot work without CANT Shield\r\n");
-                break;
+        case ATTACK_ARBITRATION_DOS:
+          install_arbitration_dos();
+          write_string("Installing the Arbitration DoS Attack\r\n");
+          break;
+        case ATTACK_SELECTIVE_ARBITRATION_DOS:
+            install_selective_arbitration_dos();
+            write_string("Installing the Selective Arbitration DoS Attack\r\n");
+            break;
+        case ATTACK_OVERLOAD_FRAMES:
+            install_overload_frame();
+            write_string("Installing the overload attack\r\n");
+            break;
+        case ATTACK_BUS_SHORT:
+            //install_bus_short();
+            //write_string("Installing the bus short attack\r\n");
+            write_string("Attack cannot work without CANT Shield\r\n");
+            break;
+        case ATTACK_NACK:
+            //install_nack_attack();
+            //write_string("Installing the NACK Attack\r\n");
+            write_string("Attack cannot work without CANT Shield\r\n");
+            break;
         default:
             write_string("No such Attack\r\n");
             break;

